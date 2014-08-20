@@ -156,8 +156,7 @@ ElseIf c = "--HELP" Then
     Print " -g       rainbow colours  COMING SOON"
     Print
     Print
-    Print "v" & version & " http://slmsay.ircpaint.com/"
-    Print "Report bugs to <taras@snowblind.net>."
+    Print "v" & version & " https://github.com/pidg/slmsay/"
     Print ""
     
 Else
