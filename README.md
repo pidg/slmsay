@@ -1,6 +1,8 @@
 slmsay
 ======
 
-A command-line tool for making colourful text banners
+A command-line tool for making colourful IRC text banners.
 
-This code is written in FreeBasic and can be compiled for your system using the FreeBasic compiler.
+The PHP version has lots of features and can also output HTML. The 'compilable' version was cobbled together in Freebasic, lacks features, and is badly-coded.
+
+Enjoy!
