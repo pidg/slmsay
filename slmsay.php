@@ -252,7 +252,7 @@ function add_3d($input_array)
 	for ( $y=0; $y < count($input_array); $y++ )
 	{
 
-		$flag = 0; $colour = -1; $length = 0;
+		$flag = 0; $colour = 0; $length = 0;
 
 		for ( $x=0; $x < count($chars[$y]); $x++ )
 		{
@@ -266,9 +266,10 @@ function add_3d($input_array)
 			} else {
 
 				// change colours of second half of stretch of blocks to shadow
-				if ( $length > 1 )
+				if ( $length > 0 )
 				{
-					$start = $x - intval($length/2);  $a=0;
+					$length++;	// it needs this, haven't figured out why
+					$start = $x - intval($length / 2);
 					for ( $z=$start; $z < ($x); $z++ ) $chars[$y][$z] = chr($shadows[$colour]+97);
 				}
 
@@ -314,6 +315,7 @@ function convert_irc($input_array)
 
 	return $total;
 }
+
 
 function convert_html($input_array)
 {
