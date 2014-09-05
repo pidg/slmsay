@@ -5,6 +5,7 @@
 	copyright 2001-2014 @tarasyoung
 
 	Features in this edition:
+	- Single colour
 	- Multicolour
 	- Rainbow colours
 	- Shadow
@@ -42,7 +43,7 @@ function slm($input)
 	// using . for 'transparent' blocks and letters for colour blocks (a=0, b=1, c=2 ...)
 
 	global $multicolour, $rainbow, $shadow, $dimensions, $allcolours, $upsidedown;
-	global $widthmult, $heightmult;
+	global $widthmult, $heightmult, $background, $foreground;
 	global $colours, $shadows, $rainbowcolours, $brightcolours;
 
 	$characters = array(
@@ -130,6 +131,7 @@ function slm($input)
 	$lastcolour = 0; $bow = 0;	// init some variables
 	if ( $shadow ) $maxlines++;	// shadow requires an additional line
 
+	// cycle through our input string and add each letter
 	foreach ( $letters as $letter )
 	{
 		if ( $multicolour )
@@ -149,7 +151,7 @@ function slm($input)
 
 		if ( !$multicolour && !$rainbow )
 		{
-			$colour = 0;
+			$colour = $foreground;
 		}
 
 		// build the letters up:
@@ -177,7 +179,7 @@ function slm($input)
 	if ( $shadow ) $total = add_shadow($total);
 	if ( $upsidedown ) $total = flip_it($total);
 
-	$total = stretchlm($total, $widthmult, $heightmult);
+	$total = stretch_it($total, $widthmult, $heightmult);
 
 	return $total;
 
@@ -204,7 +206,7 @@ function newcolour($oldcolour)
 function add_shadow($input_array)
 {
 	// adds shadow to anything
-	global $colours, $shadows, $rainbowcolours, $brightcolours;
+	global $colours, $shadows, $rainbowcolours, $brightcolours, $background;
 
 	// split lines into individual blocks
 	for ( $y=0; $y < count($input_array); $y++ ) $chars[$y] = str_split($input_array[$y]);
@@ -222,8 +224,16 @@ function add_shadow($input_array)
 
 			if ( $shadcolour == -51 && $thiscolour != -51 )
 			{
-				// replace space with shadow
-				$newchars[$y+1][$x+1] = chr($shadows[$thiscolour]+97);
+				// pick appropriate shadow colour:
+				switch ( $background )
+				{
+					case 1: case 2: case 3: case 5: case 6: case 10: case 12: case 14:
+						$shadowcolour = $shadows[$thiscolour]; break;
+					default:
+						$shadowcolour = 15;
+				}
+
+				$newchars[$y+1][$x+1] = chr($shadowcolour + 97);	// replace space with shadow
 
 			} else {
 
@@ -304,17 +314,15 @@ function add_3d($input_array)
 
 function flip_it($input_array)
 {
-	$input_array = array_reverse($input_array);
-	foreach ( $input_array as $line )
-	{
-		$total[] = strrev($line);
-	}
-
+	// flips a figure vertically and horizontally
+	foreach ( array_reverse($input_array) as $line ) $total[] = strrev($line);
 	return $total;
 }
 
-function stretchlm($input_array, $width, $height)
+function stretch_it($input_array, $width, $height)
 {
+
+	// stretches a figure using integer multipliers
 
 	if ( $width < 1 ) { $width = 1; }		// avoid width < 1
 	if ( $height < 1 ) { $height = 1; }	// avoid hegiht < 1
@@ -329,10 +337,14 @@ function stretchlm($input_array, $width, $height)
 }
 
 
+
+
 function convert_irc($input_array)
 {
 	// converts a built text figure into irc code
 	// do   echo convert_irc(slm("my text"));
+
+	global $background;
 
 	for ( $n=0; $n < count($input_array); $n++ )
 	{
@@ -340,7 +352,7 @@ function convert_irc($input_array)
 		for ( $i=0; $i < count($chars); $i++ )
 		{
 			$thiscolour = ord($chars[$i]) - 97;
-			if ( $thiscolour == -51 ) $thiscolour = 1;	// background = black
+			if ( $thiscolour == -51 ) $thiscolour = $background;	// background = black
 			$chars[$i] = chr(3) . strval($thiscolour) . "," . strval($thiscolour) . "#";
 		}
 		$total[$n] = implode($chars);
@@ -354,6 +366,8 @@ function convert_html($input_array)
 	// converts a built text figure into html
 	// do   echo convert_html(slm("my text"));
 
+	global $background;
+
 	$colourshex = array("#fff","#000","#008","#080","#f00","#800","#808","#fc0","#ff0","#0f0","#088","#0ff","#00f","#f0f","#888","#ccc");
 
 	for ( $n=0; $n < count($input_array); $n++ )
@@ -362,7 +376,7 @@ function convert_html($input_array)
 		for ( $i=0; $i < count($chars); $i++ )
 		{
 			$thiscolour = ord($chars[$i]) - 97;
-			if ( $thiscolour == -51 ) $thiscolour = 1;	// background = black
+			if ( $thiscolour == -51 ) $thiscolour = $background;	// background = black
 			$total[$n] = $total[$n] . "<span style=\"color:" . $colourshex[$thiscolour] . "\">&#9608;</span>";
 		}
 	}
@@ -370,6 +384,8 @@ function convert_html($input_array)
 	return $total;
 }
 
+$background = 1;		// background colour (1=black)
+$foreground = 0;		// foreground colour (0=white)
 $allcolours = 0;		// whether to use all colours or only bright ones
 $multicolour = 1;		// whether to use colours at all
 $rainbow = 0;			// use rainbow colours
@@ -381,3 +397,4 @@ $heightmult = 1;		// height multiplier
 
 $slm = (convert_html(slm("SLM")));
 foreach ( $slm as $line ) echo "<div>$line</div>\n";
+
