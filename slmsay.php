@@ -32,14 +32,9 @@
 	0. You just DO WHAT THE FUCK YOU WANT TO.
 */
 
-$colours = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
-$shadows = array(15,1,1,1,5,1,1,14,7,3,2,10,2,6,1,14);
-$rainbowcolours = array(4,7,8,9,11,12,13);
-$brightcolours = array(4,8,9,11,13);
-
 function slm($input)
 {
-	// This returns an array of lines with a built text figure
+	// This returns an array of lines with a built text banner
 	// using . for 'transparent' blocks and letters for colour blocks (a=0, b=1, c=2 ...)
 
 	global $multicolour, $rainbow, $shadow, $dimensions, $allcolours, $upsidedown;
@@ -259,7 +254,7 @@ function add_3d($input_array)
 
 	for ( $y=0; $y < count($input_array); $y++ )
 	{
-		// add padding to the right of the figure - this simplifies end-of-line detection
+		// add padding to the right of the banner - this simplifies end-of-line detection
 		$input_array[$y] = $input_array[$y] . ".";
 
 		// split lines into colour blocks
@@ -304,7 +299,7 @@ function add_3d($input_array)
 		$total[$y] = implode($chars[$y]);
 	}
 
-	// trim additional block from end of figure
+	// trim additional block from end of banner
 	for ( $y=0; $y < count($total); $y++ ) $total[$y] = substr($total[$y], 0, -1);
 
 
@@ -314,7 +309,7 @@ function add_3d($input_array)
 
 function flip_it($input_array)
 {
-	// flips a figure vertically and horizontally
+	// flips a banner vertically and horizontally
 	foreach ( array_reverse($input_array) as $line ) $total[] = strrev($line);
 	return $total;
 }
@@ -322,7 +317,7 @@ function flip_it($input_array)
 function stretch_it($input_array, $width, $height)
 {
 
-	// stretches a figure using integer multipliers
+	// stretches a banner using integer multipliers
 
 	if ( $width < 1 ) { $width = 1; }		// avoid width < 1
 	if ( $height < 1 ) { $height = 1; }	// avoid hegiht < 1
@@ -341,7 +336,7 @@ function stretch_it($input_array, $width, $height)
 
 function convert_irc($input_array)
 {
-	// converts a built text figure into irc code
+	// converts a built text banner into irc code
 	// do   echo convert_irc(slm("my text"));
 
 	global $background;
@@ -363,7 +358,7 @@ function convert_irc($input_array)
 
 function convert_html($input_array)
 {
-	// converts a built text figure into html
+	// converts a built text banner into html
 	// do   echo convert_html(slm("my text"));
 
 	global $background;
@@ -384,17 +379,39 @@ function convert_html($input_array)
 	return $total;
 }
 
-$background = 1;		// background colour (1=black)
-$foreground = 0;		// foreground colour (0=white)
-$allcolours = 0;		// whether to use all colours or only bright ones
-$multicolour = 1;		// whether to use colours at all
-$rainbow = 0;			// use rainbow colours
-$shadow = 0;			// add shadow
-$dimensions = 2;		// add 3D effect if set to 3
-$upsidedown = 0;		// flip it!
-$widthmult = 1;		// width multiplier
-$heightmult = 1;		// height multiplier
+function slm_init()
+{
 
-$slm = (convert_html(slm("SLM")));
-foreach ( $slm as $line ) echo "<div>$line</div>\n";
+	// Sets up variables to produce a standard text banner
 
+	global $colours, $shadows, $rainbowcolours, $brightcolours;
+	global $background, $foreground, $allcolours, $multicolour;
+	global $rainbow, $shadow, $dimensions, $upsidedown;
+	global $widthmult, $heightmult;
+
+	$colours = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);	// standard colours
+	$shadows = array(15,1,1,1,5,1,1,14,7,3,2,10,2,6,1,14);		// shadow colours (for dark backgrounds)
+	$rainbowcolours = array(4,7,8,9,11,12,13);				// rainbow colour cycle
+	$brightcolours = array(4,8,9,11,13);					// bright colours
+
+	$background = 1;		// background colour (1=black)
+	$foreground = 0;		// default foreground colour (0=white)
+	$allcolours = 0;		// whether to use all colours or only bright ones
+	$multicolour = 1;		// whether to use colours at all
+	$rainbow = 0;			// use rainbow colours
+	$shadow = 0;			// add shadow
+	$dimensions = 2;		// add 3D effect if set to 3
+	$upsidedown = 0;		// flip it!
+	$widthmult = 1;		// width multiplier
+	$heightmult = 1;		// height multiplier
+}
+
+
+/* Demo code below this point */
+
+slm_init();
+$slm = slm("SLM");
+foreach ( convert_html($slm) as $line )
+{
+	echo "<div>$line</div>\n";
+}
