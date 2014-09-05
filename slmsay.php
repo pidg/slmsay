@@ -9,6 +9,8 @@
 	- Rainbow colours
 	- Shadow
 	- 3D
+	- Upside-down
+	- Stretch width/height
 	- IRC colour code output
 	- HTML output
 */
@@ -39,7 +41,8 @@ function slm($input)
 	// This returns an array of lines with a built text figure
 	// using . for 'transparent' blocks and letters for colour blocks (a=0, b=1, c=2 ...)
 
-	global $multicolour, $rainbow, $shadow, $dimensions, $allcolours;
+	global $multicolour, $rainbow, $shadow, $dimensions, $allcolours, $upsidedown;
+	global $widthmult, $heightmult;
 	global $colours, $shadows, $rainbowcolours, $brightcolours;
 
 	$characters = array(
@@ -172,8 +175,12 @@ function slm($input)
 
 	if ( $dimensions > 2 ) $total = add_3d($total);
 	if ( $shadow ) $total = add_shadow($total);
+	if ( $upsidedown ) $total = flip_it($total);
+
+	$total = stretchlm($total, $widthmult, $heightmult);
 
 	return $total;
+
 }
 
 
@@ -295,6 +302,32 @@ function add_3d($input_array)
 
 }
 
+function flip_it($input_array)
+{
+	$input_array = array_reverse($input_array);
+	foreach ( $input_array as $line )
+	{
+		$total[] = strrev($line);
+	}
+
+	return $total;
+}
+
+function stretchlm($input_array, $width, $height)
+{
+
+	if ( $width < 1 ) { $width = 1; }		// avoid width < 1
+	if ( $height < 1 ) { $height = 1; }	// avoid hegiht < 1
+
+	foreach ( $input_array as $line )
+	{
+		$line = preg_replace('/./', str_repeat("\$0", $width), $line);	// stretch width
+		for ( $n=1; $n <= $height; $n++ ) $total[] = $line;			// stretch height
+	}
+
+	return $total;
+}
+
 
 function convert_irc($input_array)
 {
@@ -315,7 +348,6 @@ function convert_irc($input_array)
 
 	return $total;
 }
-
 
 function convert_html($input_array)
 {
@@ -338,12 +370,14 @@ function convert_html($input_array)
 	return $total;
 }
 
-
 $allcolours = 0;		// whether to use all colours or only bright ones
 $multicolour = 1;		// whether to use colours at all
 $rainbow = 0;			// use rainbow colours
 $shadow = 0;			// add shadow
 $dimensions = 2;		// add 3D effect if set to 3
+$upsidedown = 0;		// flip it!
+$widthmult = 1;		// width multiplier
+$heightmult = 1;		// height multiplier
 
 $slm = (convert_html(slm("SLM")));
 foreach ( $slm as $line ) echo "<div>$line</div>\n";
