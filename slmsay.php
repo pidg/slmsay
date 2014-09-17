@@ -8,7 +8,7 @@
 	- Single colour
 	- Multicolour
 	- Rainbow colours
-	- Shadow
+	- Shadow (with variable distance)
 	- 3D
 	- Upside-down
 	- Stretch width/height
@@ -38,7 +38,7 @@ function slm($input)
 	// using . for 'transparent' blocks and letters for colour blocks (a=0, b=1, c=2 ...)
 
 	global $multicolour, $rainbow, $shadow, $dimensions, $allcolours, $upsidedown;
-	global $widthmult, $heightmult, $background, $foreground;
+	global $widthmult, $heightmult, $background, $foreground, $shadowdistance;
 	global $colours, $shadows, $rainbowcolours, $brightcolours;
 
 	$characters = array(
@@ -111,8 +111,8 @@ function slm($input)
 				"|" => "#,#,#,#,#",
 				"}" => "#..,.#.,.##,.#.,#..",
 				"~" => ".....,.#...,#.#.#,...#.,.....",
-				"£" => "..###.,.#...#,####..,.#....,######",
-				"¬" => "......,......,######,.....#,......"
+				"Â£" => "..###.,.#...#,####..,.#....,######",
+				"Â¬" => "......,......,######,.....#,......"
 			);
 
 
@@ -124,7 +124,7 @@ function slm($input)
 
 	$letters = str_split(strtoupper($input));	// explode input letters e.g. == array("H","E","L","L","O")
 	$lastcolour = 0; $bow = 0;	// init some variables
-	if ( $shadow ) $maxlines++;	// shadow requires an additional line
+	if ( $shadow ) $maxlines+=$shadowdistance;	 // shadow requires additional lines
 
 	// cycle through our input string and add each letter
 	foreach ( $letters as $letter )
@@ -201,48 +201,37 @@ function newcolour($oldcolour)
 function add_shadow($input_array)
 {
 	// adds shadow to anything
-	global $colours, $shadows, $rainbowcolours, $brightcolours, $background;
+	global $colours, $shadows, $rainbowcolours, $brightcolours, $background, $shadowdistance;
 
-	// split lines into individual blocks
-	for ( $y=0; $y < count($input_array); $y++ ) $chars[$y] = str_split($input_array[$y]);
+	// add enough space for the shadow to be cast into
+	for ( $y=0; $y < count($input_array); $y++ ) $input_array[$y] = $input_array[$y] . str_repeat(".", $shadowdistance);
 
-	// cycle through blocks and add shadow
-	for ( $y=0; $y < count($input_array)-1; $y++ )
+	for ( $y=0; $y < count($input_array); $y++ )
+	{
+		$current[$y] = str_split($input_array[$y]);
+		$new[$y] = str_split($input_array[$y]);
+	}
+
+	for ( $y=0; $y < count($current); $y++ )
 	{
 
-		$newchars[$y+1][0] = $chars[$y+1][0];
-
-		for ( $x=0; $x < count($chars[$y])-1; $x++ )
+		for ( $x=0; $x < count($current[$y]); $x++ )
 		{
-			$thiscolour = ord($chars[$y][$x]) - 97;		// colour of current block
-			$shadcolour = ord($chars[$y+1][$x+1]) - 97;	// colour of block in shadow area
-
-			if ( $shadcolour == -51 && $thiscolour != -51 )
+			if ( $current[$y][$x] != "." )
 			{
-				// pick appropriate shadow colour:
-				switch ( $background )
+				if ( $new[$y + $shadowdistance][$x + $shadowdistance] == "." )
 				{
-					case 1: case 2: case 3: case 5: case 6: case 10: case 12: case 14:
-						$shadowcolour = $shadows[$thiscolour]; break;
-					default:
-						$shadowcolour = 15;
+					$thiscolour = ord($current[$y][$x]) - 97;
+					$new[$y + $shadowdistance][$x + $shadowdistance] = chr($shadows[$thiscolour]+97);
 				}
-
-				$newchars[$y+1][$x+1] = chr($shadowcolour + 97);	// replace space with shadow
-
-			} else {
-
-				// keep existing block
-				$newchars[$y+1][$x+1] = $chars[$y+1][$x+1];
 			}
 		}
 
-		if ( $y > 0 ) $input_array[$y] = implode($newchars[$y]);	// compose current line
 	}
 
-	$input_array[$y] = implode($newchars[$y]);	// compose final line
 
-	return $input_array;
+	for ( $n=0; $n < count($new); $n++ ) $output[$n] = implode($new[$n]); // collapse arrays back into strings
+	return $output;
 
 }
 
@@ -387,7 +376,7 @@ function slm_init()
 	global $colours, $shadows, $rainbowcolours, $brightcolours;
 	global $background, $foreground, $allcolours, $multicolour;
 	global $rainbow, $shadow, $dimensions, $upsidedown;
-	global $widthmult, $heightmult;
+	global $widthmult, $heightmult, $shadowdistance;
 
 	$colours = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);	// standard colours
 	$shadows = array(15,1,1,1,5,1,1,14,7,3,2,10,2,6,1,14);		// shadow colours (for dark backgrounds)
@@ -400,6 +389,7 @@ function slm_init()
 	$multicolour = 1;		// whether to use colours at all
 	$rainbow = 0;			// use rainbow colours
 	$shadow = 0;			// add shadow
+	$shadowdistance = 1;	// distance of shadow
 	$dimensions = 2;		// add 3D effect if set to 3
 	$upsidedown = 0;		// flip it!
 	$widthmult = 1;		// width multiplier
