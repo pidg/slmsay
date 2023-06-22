@@ -1,6 +1,6 @@
 '
 ' SLMSAY
-' by @tarasyoung
+' by @pidg
 '
 '
 '            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
@@ -18,7 +18,7 @@
 '  0. You just DO WHAT THE FUCK YOU WANT TO. 
 '
 
-dim version As string = "0.2"
+dim version As string = "0.21"
 
 public Function Replace(intext As string, replacewhat As string, replacewith As string) As string
      
