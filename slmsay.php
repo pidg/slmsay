@@ -4,22 +4,14 @@
 	slmsay (PHP edition)
 	Advanced IRC Banner Tool
 
-	Copyright 2001-2021 Taras Young (@pidg)
+	Copyright 2001-2023 Taras Young (@pidg)
 
-	20th Anniversary Edition
+	v2306
 
-	Now with:
+	Added:
 
-	 - Mono colour
-	 - Multicolour
-	 - Rainbow colour palette
-	 - Grey colour palette
-	 - Shadow (with variable shadow size)
-	 - 3D effect
-	 - Flip upside-down
-	 - Width/height multipliers
-	 - IRC colour code output
-	 - HTML output
+	- Flip horizontal (/f)
+	- Dark colours only (/d)
 
 	Usage:
 	 
@@ -67,6 +59,7 @@ function slm($input)
 	global $multicolour, $rainbow, $shadow, $dimensions, $allcolours, $upsidedown;
 	global $widthmult, $heightmult, $background, $foreground, $greys, $greycolours;
 	global $colours, $shadows, $shadowwidth, $brightcolours, $rainbowcolours;
+	global $fliphoriz, $darkcolours, $darkonly, $darkrainbowcolours;
 
 	// Define character set:
 
@@ -182,7 +175,8 @@ function slm($input)
 		if ( $rainbow )
 		{
 			// Cycle through rainbow colours
-			$colour = $rainbowcolours[$bow];
+			$colour = ($darkonly && $rainbow)? $darkrainbowcolours[$bow] : $rainbowcolours[$bow];
+
 			$bow++;
 			if ( $bow >= count($rainbowcolours)  ) $bow = 0;
 		}
@@ -237,12 +231,13 @@ function slm($input)
 	// Trim last 'space' from each line:
 	if ( !$shadow ) for ( $n=0; $n < count($total); $n++ ) $total[$n] = substr($total[$n], 0, -1);
 	
-	if ( $dimensions > 2 ) $total = add_3d($total);			// Add 3D!
-	if ( $shadow ) $total = add_shadow($total);			// Add shadow!
-	if ( $upsidedown ) $total = flip_it($total);			// Flip it!
-	$total = stretch_it($total, $widthmult, $heightmult);		// Stretch it!
+	if ( $dimensions > 2 ) $total = add_3d($total);			// Add 3D
+	if ( $shadow ) $total = add_shadow($total);			// Add shadow
+	if ( $upsidedown ) $total = flip_it($total);			// Flip horizontal and vertical
+	if ( $fliphoriz ) $total = flip_h($total);
+	$total = stretch_it($total, $widthmult, $heightmult);		// Stretch it
 
-	return $total;							// Bop it!
+	return $total;
 
 }
 
@@ -251,14 +246,16 @@ function newcolour($oldcolour)
 {
 	// Returns a new colour which isn't $oldcolour (or the background)
 
-	global $brightcolours, $allcolours, $background;
+	global $brightcolours, $allcolours, $darkcolours, $darkonly, $background;
 
 	$colour = $oldcolour;
 	
 	while ( $colour == $oldcolour || $colour == $background ) 
-		$colour = ( $allcolours )? rand(0,13) : $brightcolours[rand(0,count($brightcolours)-1)];
+		$colour = ($allcolours)? rand(0,13) : $brightcolours[rand(0,count($brightcolours)-1)];
+		$colour = ($darkonly)? $darkcolours[rand(0,count($darkcolours)-1)] : $colour;
 	
 	return $colour;
+
 
 }
 
@@ -267,7 +264,8 @@ function add_shadow($input_array)
 {
 	// Adds shadow to anything..!
 
-	global $colours, $shadows, $rainbowcolours, $greycolours, $brightcolours, $background, $shadowwidth;
+	global $colours, $shadows, $rainbowcolours, $greycolours, $brightcolours;
+	global $darkcolours, $darkonly, $background, $shadowwidth;
 
 	// Add enough space for the shadow to be cast into:
 	for ( $y=0; $y < count($input_array); $y++ )
@@ -314,7 +312,7 @@ function add_shadow($input_array)
 
 function add_3d($input_array)
 {
-	global $colours, $shadows, $rainbowcolours, $greycolours, $brightcolours;
+	global $colours, $shadows, $rainbowcolours, $greycolours, $brightcolours, $darkcolours, $darkonly;
 
 	// Adds 3D effect to anything..!
 
@@ -398,6 +396,13 @@ function flip_it($input_array)
 {
 	// Flips a banner both vertically and horizontally:
 	foreach ( array_reverse($input_array) as $line ) $total[] = strrev($line);
+	return $total;
+}
+
+function flip_h($input_array)
+{
+	// Flips a banner just horizontally:
+	foreach ( $input_array as $line ) $total[] = strrev($line);
 	return $total;
 }
 
@@ -503,23 +508,28 @@ function slm_init()
 	global $background, $foreground, $allcolours, $multicolour;
 	global $rainbow, $greys, $shadow, $dimensions, $upsidedown;
 	global $widthmult, $heightmult, $shadowwidth, $greycolours;
+	global $fliphoriz, $darkcolours, $darkonly, $darkrainbowcolours;
 
 	$colours = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);	// standard colours
 	$shadows = array(15,1,1,1,5,1,1,14,7,3,2,10,2,6,1,14);		// shadow colours (for dark backgrounds)
 	$rainbowcolours = array(4,7,8,9,11,12,13);			// rainbow colour cycle
+	$darkrainbowcolours = array(5,14,7,3,10,2,6);			// dark rainbow colour cycle
 	$brightcolours = array(4,8,9,11,13);				// bright colours
+	$darkcolours = array(5,7,3,10,6);				// bright colours
 	$greycolours = array(14,15,0);					// bright colours
 
 	$background = 1;		// background colour (1=black)
 	$foreground = 0;		// default foreground colour (0=white)
 	$allcolours = 0;		// whether to use all colours or only bright ones
+	$darkonly = 0;			// whether to use only dark colours
 	$multicolour = 1;		// whether to use colours at all
 	$rainbow = 0;			// use rainbow colours
 	$greys = 0;			// use grey (gray) colours
 	$shadow = 0;			// add shadow
 	$shadowwidth = 1;		// distance of shadow
 	$dimensions = 2;		// add 3D effect if set to 3
-	$upsidedown = 0;		// flip it!
+	$upsidedown = 0;		// flip horizontal and vertical
+	$fliphoriz = 0;			// flip horizontal only
 	$widthmult = 1;			// width multiplier
 	$heightmult = 1;		// height multiplier
 }
@@ -556,11 +566,13 @@ if ( isset($argv) )
         	if ( $item == "/r" ) { $rainbow = 1; 		$clear=1; }	// use rainbow palette
         	if ( $item == "/s" ) { $shadow = 1;		$clear=1; }	// shadow switch
         	if ( $item == "/3" ) { $dimensions = 3;		$clear=1; }	// 3D switch
-        	if ( $item == "/u" ) { $upsidedown = 1;		$clear=1; }	// flip switch
+        	if ( $item == "/u" ) { $upsidedown = 1;		$clear=1; }	// flip horizontal + vertical
+        	if ( $item == "/f" ) { $fliphoriz = 1;		$clear=1; }	// flip horizontal only
         	if ( $item == "/w" ) { $widthmult++;		$clear=1; }	// increase width
         	if ( $item == "/h" ) { $heightmult++;		$clear=1; }	// increase height
         	if ( $item == "/m" ) { $multicolour = 0;	$clear=1; }	// turn off multicolour
         	if ( $item == "/a" ) { $allcolours = 1;		$clear=1; }	// use dark colours too
+        	if ( $item == "/d" ) { $darkonly = 1;		$clear=1; }	// use dark colours only
         	if ( $item == "/g" ) { $greys = 1;		$clear=1; }	// use grey palette
 
         	// Ordinary text
