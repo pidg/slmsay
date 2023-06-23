@@ -513,12 +513,12 @@ function slm_init()
 	global $fliphoriz, $darkcolours, $darkonly, $darkrainbowcolours;
 
 	$colours = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);	// standard colours
-	$shadows = array(15,1,1,1,5,1,1,14,7,3,2,10,2,6,1,14);		// shadow colours (for dark backgrounds)
+	$shadows = array(15,1,1,1,5,1,1,14,7,3,2,10,2,6,1,14);		// shadow colours
 	$rainbowcolours = array(4,7,8,9,11,12,13);			// rainbow colour cycle
 	$darkrainbowcolours = array(5,14,7,3,10,2,6);			// dark rainbow colour cycle
 	$brightcolours = array(4,8,9,11,13);				// bright colours
-	$darkcolours = array(5,7,3,10,6);				// bright colours
-	$greycolours = array(14,15,0);					// bright colours
+	$darkcolours = array(5,7,3,10,6);				// dark colours
+	$greycolours = array(14,15,0);					// grey colours
 
 	$background = 1;		// background colour (1=black)
 	$foreground = 0;		// default foreground colour (0=white)
