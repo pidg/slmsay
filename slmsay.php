@@ -250,9 +250,11 @@ function newcolour($oldcolour)
 
 	$colour = $oldcolour;
 	
-	while ( $colour == $oldcolour || $colour == $background ) 
+	while ( $colour == $oldcolour || $colour == $background )
+	{
 		$colour = ($allcolours)? rand(0,13) : $brightcolours[rand(0,count($brightcolours)-1)];
 		$colour = ($darkonly)? $darkcolours[rand(0,count($darkcolours)-1)] : $colour;
+	}
 	
 	return $colour;
 
